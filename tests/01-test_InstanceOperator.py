@@ -1,4 +1,4 @@
-from setInstance import InstanceOperator
+from instanceTuner.setInstance import InstanceOperator
 
 
 print(isinstance([], (str, list, tuple)))  # A or B: True

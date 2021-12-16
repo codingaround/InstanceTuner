@@ -1,5 +1,5 @@
-from instanceTuner import setFunction
-from setInstance import *
+from instanceTuner.setInstance import *
+from instanceTuner.instanceTuner import setFunction
 
 
 def printException(fn, *args, **kwargs):
@@ -66,6 +66,9 @@ printException(Test2)
 print('\n'*2)
 
 
+NotNumber = InstanceOperator('not', Number)
+
+
 class Test3:
     @setFunction
     def __init__(self, a: Number, b: Number) -> None:
@@ -74,10 +77,10 @@ class Test3:
         self.b = b
 
     @setFunction
-    def __init__(self, a: Number) -> None:
+    def __init__(self, a: NotNumber, b: NotNumber) -> None:
         super().__init__()
         self.a = a
-        self.b = a
+        self.b = b
 
     def get(self):
         return self.a + self.b
@@ -85,10 +88,10 @@ class Test3:
 
 print('Test3')
 
-t = Test3(4)
+t = Test3(4, 5)
 print(t.get())
 
-t = Test3(4, 5)
+t = Test3('4', '5')
 print(t.get())
 
 printException(Test3)

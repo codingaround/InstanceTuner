@@ -1,4 +1,4 @@
-from setInstance import *
+from instanceTuner.setInstance import *
 
 
 class Test:

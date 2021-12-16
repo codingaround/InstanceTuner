@@ -1,6 +1,6 @@
 from typing import Any
-from instanceTuner import setFunction
-from setInstance import *
+from instanceTuner.setInstance import *
+from instanceTuner.instanceTuner import setFunction
 
 
 def printException(fn, *args, **kwargs):
