@@ -1,6 +1,10 @@
 # InstanceTuner
 Set limited type instances and overload functions like Java in python
 
+you can install it by:
+    pip install instanceTuner    
+_____________________________________________________
+
     from instanceTuner.instanceTuner import setFunction
     
     class Test:
