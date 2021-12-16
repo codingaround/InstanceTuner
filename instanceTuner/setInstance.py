@@ -59,7 +59,7 @@ class InstanceOperator:
         """
 
         assert len(
-            instances) > 1, 'this class operat on instances, you must use instances too'
+            instances) > 0, 'this class operat on instances, you must use instances too'
         assert operator in ('or', 'not'), 'use "or" "not"'
 
         self.operator = operator

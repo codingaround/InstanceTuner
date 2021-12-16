@@ -1,7 +1,7 @@
 from inspect import _ParameterKind, Parameter, signature, _empty
 import sys
 from typing import Any
-from setInstance import hasInstanceCheck
+from instanceTuner.setInstance import hasInstanceCheck
 
 
 class Arg:
