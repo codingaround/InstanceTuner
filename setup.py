@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="instanceTuner",
-    version="1.0.0",
+    version="1.1.0",
     description="Set limited type instances and overload functions like Java in python",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -19,9 +19,9 @@ setup(
     author_email="codingaround90s@gmail.com",
     license="GNU",
     classifiers=[
-        "License :: OSI Approved :: GNU License",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9.3",
+        "Programming Language :: Python :: 3.9",
     ],
     # packages=["instanceTuner"],
     packages=find_packages(exclude=("tests",)),
