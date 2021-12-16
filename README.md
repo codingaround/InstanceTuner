@@ -3,11 +3,11 @@ Set limited type instances and overload functions like Java in python
 
 Do you want to never write 'raise' or 'assert' in your python code when it comes to function arguments?
 
-@setFuncrion
+@setFunction
 
 def test(a: int):
 
-  pass
+    pass
   
 This package will raise error for you if 'a' does'nt give integer value 
 
