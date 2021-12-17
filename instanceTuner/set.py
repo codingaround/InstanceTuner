@@ -131,6 +131,8 @@ class ArgsCheck:
             ' but expected {annotation}' + \
             self.sig
 
+        self.set()
+
     def __repr__(self) -> str:
         return str(self.__dict__)
 
@@ -301,7 +303,7 @@ class ArgsCheck:
             except Exception as e:
                 errors.append(str(e))
 
-        assert False, '\n'.join(errors)
+        assert False, '\n\n'.join(errors)
 
 
 # ********************
@@ -326,7 +328,6 @@ class Function(ArgsCheck):
         """
 
         super().__init__(fn)
-        self.set()
 
     @staticmethod
     def Call(self):
