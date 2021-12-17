@@ -1,9 +1,6 @@
 # InstanceTuner
 Set limited type instances and overload functions like Java in python
 
-<<<<<<< HEAD
-    from instanceTuner.set import setFunction
-=======
 you can install it by:
 
     pip install instanceTuner    
@@ -12,8 +9,7 @@ Do you want to be able overload every function and method, even constructors (__
 
 Do you want to never write 'raise' or 'assert' in your python code when it comes to function arguments?
 
-    from instanceTuner.instanceTuner import setFunction
->>>>>>> 6533f0be94753df258f04fa0c5a833e233f9da1f
+    from instanceTuner.set import setFunction
     
     class Test:
         @setFunction
