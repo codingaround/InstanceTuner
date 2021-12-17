@@ -1,7 +1,7 @@
 # InstanceTuner
 Set limited type instances and overload functions like Java in python
 
-    from instanceTuner.instanceTuner import setFunction
+    from instanceTuner.set import setFunction
     
     class Test:
         @setFunction

@@ -20,7 +20,72 @@ def hasInstanceCheck(__instance):
         return False
 
 
-class InstanceOperator:
+class Operator:
+
+    """
+    This class is just a base class for
+    ClassOperator and InstanceOperator
+    """
+
+    def __init__(self, operator: str) -> None:
+        """
+        operator: an string which must be 'or' or 'not'
+        """
+
+        assert operator in ('or', 'not'), 'use "or" "not"'
+        self.operator = operator
+
+
+class ClassOperator(Operator):
+
+    """
+    A class for completing InstanceOperator
+
+
+    its __init__ takes two arguments :
+    operator: an string which must be 'or' or 'not'
+    cls: must be a class
+
+    operator will use for determine if cls is
+    what we want or what we avoid
+
+
+    For example we wanna say if an object is
+    instance of a class but we wanna get False if
+    the object is the class itself.
+
+    for example :
+
+    iop = InstanceOperator(
+    'not', Test, ClassOperator('or', Test))
+
+    print(isinstance(Test, iop))   # False
+    print(isinstance(Test(), iop)) # False
+
+
+    iop = InstanceOperator(
+        'or', Test, ClassOperator('or', Test))
+
+    print(isinstance(Test, iop))   # True
+    print(isinstance(Test(), iop)) # True
+    """
+
+    def __init__(self, operator: str, cls) -> None:
+        """
+        its __init__ takes two arguments :
+        operator: an string which must be 'or' or 'not'
+        cls: must be a class
+        """
+
+        super().__init__(operator)
+        assert '__init__' in dir(cls), 'cls must be a class'
+        self.cls = cls
+
+    def __instancecheck__(self, __instance: Any) -> bool:
+        return __instance is self.cls
+
+
+class InstanceOperator(Operator):
 
     """
     A class to do isinstance job, 
@@ -49,7 +114,7 @@ class InstanceOperator:
 
     def __init__(self, operator: str, *instances) -> None:
         """
-        its __init__ takes at least two arguments :
+        __init__ takes at least two arguments :
         operator: an string which must be 'or' or 'not'
         *instances: must use at least one Variable Positional for it and
         these Variables must be a class or instance which have __instancecheck__
@@ -58,11 +123,10 @@ class InstanceOperator:
         are what we want or what we avoid
         """
 
+        super().__init__(operator)
+
         assert len(
             instances) > 0, 'this class operat on instances, you must use instances too'
-        assert operator in ('or', 'not'), 'use "or" "not"'
-
-        self.operator = operator
 
         for i in instances:
             assert hasInstanceCheck(i)
@@ -100,10 +164,6 @@ class RepeatBoundary:
 
     """
     It just use to keep minimum and maximum of a repetition
-
-    its __init__ takes at least one argument which is min_
-    min_ and max_ must be integer 
-    max_ must be equal or greater than min_
     """
 
     def __init__(self, min_, max_=None) -> None:
