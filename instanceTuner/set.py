@@ -4,6 +4,13 @@ from typing import Any
 from instanceTuner.operator import hasInstanceCheck
 
 
+def getNameOrSelf(obj):
+    try:
+        return obj.__name__
+    except Exception:
+        return obj
+
+
 class Arg:
     """
     It keeps Parameter instance and sets value for it
@@ -155,7 +162,7 @@ class ArgsCheck:
 
             if exc_type == TypeError:
                 strE = self.annotationError
-                raise TypeError(strE.format(annotation=arg.arg.annotation.__name__,
+                raise TypeError(strE.format(annotation=getNameOrSelf(arg.arg.annotation),
                                             argType=type(value).__name__,
                                             argName=arg.arg.name))
 
@@ -251,10 +258,7 @@ class ArgsCheck:
 
         if 'return' in self.fn.__annotations__:
 
-            try:
-                annotation = self.fn.__annotations__["return"].__name__
-            except Exception:
-                annotation = self.fn.__annotations__["return"]
+            annotation = getNameOrSelf(self.fn.__annotations__["return"])
 
             if hasInstanceCheck(self.fn.__annotations__['return']):
 
