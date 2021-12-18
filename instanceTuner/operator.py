@@ -20,6 +20,50 @@ def hasInstanceCheck(__instance):
         return False
 
 
+class ClassOperator:
+
+    """
+    We wanna say if an object is equal 
+    to a class by using isinstance method.
+
+    its __init__ takes one arguments :
+    cls: must be a class
+
+    for example :
+
+    iop = InstanceOperator(
+    'or', Test, ClassOperator(Test))
+
+    print(isinstance(Test, iop))   # True
+    print(isinstance(Test(), iop)) # True
+
+    iop = InstanceOperator(
+        'not', Test, ClassOperator(Test))
+
+    print(isinstance(Test, iop))   # False
+    print(isinstance(Test(), iop)) # False
+    """
+
+    def __init__(self, cls) -> None:
+        """
+        __init__ takes one arguments :
+        cls: must be a class
+        """
+
+        assert '__init__' in dir(cls), 'cls must be a class'
+        self.cls = cls
+
+    def __repr__(self) -> str:
+        return f'{self.cls}'
+
+    def __instancecheck__(self, __instance: Any) -> bool:
+        return __instance is self.cls
+
+    @staticmethod
+    def setClasses(classes):
+        return [ClassOperator(cls) for cls in classes]
+
+
 class Operator:
 
     """
@@ -34,55 +78,6 @@ class Operator:
 
         assert operator in ('or', 'not'), 'use "or" "not"'
         self.operator = operator
-
-
-class ClassOperator(Operator):
-
-    """
-    A class for completing InstanceOperator
-
-
-    its __init__ takes two arguments :
-    operator: an string which must be 'or' or 'not'
-    cls: must be a class
-
-    operator will use for determine if cls is
-    what we want or what we avoid
-
-
-    For example we wanna say if an object is
-    instance of a class but we wanna get False if
-    the object is the class itself.
-
-    for example :
-
-    iop = InstanceOperator(
-    'not', Test, ClassOperator('or', Test))
-
-    print(isinstance(Test, iop))   # False
-    print(isinstance(Test(), iop)) # False
-
-
-    iop = InstanceOperator(
-        'or', Test, ClassOperator('or', Test))
-
-    print(isinstance(Test, iop))   # True
-    print(isinstance(Test(), iop)) # True
-    """
-
-    def __init__(self, operator: str, cls) -> None:
-        """
-        its __init__ takes two arguments :
-        operator: an string which must be 'or' or 'not'
-        cls: must be a class
-        """
-
-        super().__init__(operator)
-        assert '__init__' in dir(cls), 'cls must be a class'
-        self.cls = cls
-
-    def __instancecheck__(self, __instance: Any) -> bool:
-        return __instance is self.cls
 
 
 class InstanceOperator(Operator):
@@ -160,6 +155,46 @@ class InstanceOperator(Operator):
         return True
 
 
+class ObjectOperator(InstanceOperator):
+
+    """
+    A class based on InstanceOperator for completing it
+
+    if we use this class instead of InstanceOperator,
+    when __instancecheck__ is called and self.operator
+    is 'or', we are saying if an object is instance of
+    a class or the class itself.
+    when self.operator is 'not', we are saying if 
+    an object is not instance of a class and 
+    not the class itself.
+
+    its __init__ takes at least two arguments :
+    operator: an string which must be 'or' or 'not'
+    *instances: must use at least one Variable Positional for it and
+    these Variables must be a class or an instance of a class with 
+    __instancecheck__
+
+    operator will use for determine if instances
+    are what we want or what we avoid
+
+    for example:
+
+    oop = ObjectOperator('or', Test)
+
+    print(isinstance(Test, oop))   # True
+    print(isinstance(Test(), oop)) # True
+
+    oop = ObjectOperator('not', Test)
+
+    print(isinstance(Test, oop))   # False
+    print(isinstance(Test(), oop)) # False
+    """
+
+    def __init__(self, operator: str, *instances) -> None:
+        objects = instances + tuple(ClassOperator.setClasses(instances))
+        super().__init__(operator, *objects)
+
+
 class RepeatBoundary:
 
     """
@@ -225,6 +260,9 @@ class MapInstances:
         by non RepeatBoundary object.
 
         whole RepeatBoundary thing is for counting repetition of an object in mapTuple
+
+        for more explanation about using key value pair or index value pair iterables
+        check out : 
         """
         self.instance = instance_
         self.setMapTuple(*mapTuple)
