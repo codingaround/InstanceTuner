@@ -56,7 +56,7 @@ class ClassOperator:
     def __repr__(self) -> str:
         return f'{self.cls}'
 
-    def __instancecheck__(self, __instance: Any) -> bool:
+    def __instancecheck__(self, __instance) -> bool:
         return __instance is self.cls
 
     @staticmethod
@@ -132,7 +132,7 @@ class InstanceOperator(Operator):
         result = f' {self.operator} '.join([str(i) for i in self.instances])
         return result if self.operator == 'or' else ' not ' + result
 
-    def __instancecheck__(self, __instance: Any) -> bool:
+    def __instancecheck__(self, __instance) -> bool:
         """
         this method returns True if __instance 
         is actually an instance of instances and operator is 'or',
@@ -191,6 +191,17 @@ class ObjectOperator(InstanceOperator):
     """
 
     def __init__(self, operator: str, *instances) -> None:
+        """
+        __init__ takes at least two arguments :
+        operator: an string which must be 'or' or 'not'
+        *instances: must use at least one Variable Positional for it and
+        these Variables must be a class or an instance of a class with 
+        __instancecheck__
+
+        operator will use for determine if instances
+        are what we want or what we avoid
+        """
+
         objects = instances + tuple(ClassOperator.setClasses(instances))
         super().__init__(operator, *objects)
 
