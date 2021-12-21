@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="instanceTuner",
-    version="1.6.1",
+    version="1.6.2",
     description="Set limited type instances and overload functions like Java in python",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -25,7 +25,7 @@ setup(
     ],
     # packages=["instanceTuner"],
     packages=find_packages(exclude=("tests",)),
-    # install_requires=[],
+    install_requires=['CAImport'],
     # entry_points={
     #    "console_scripts": [
     #    "realpython=instanceTuner.__main__:main",

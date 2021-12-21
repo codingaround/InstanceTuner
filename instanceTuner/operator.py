@@ -1,23 +1,47 @@
 from typing import Any
+from CAImport.tools import isIter, hasInstancecheck as hic
 
 
-# ********************
-# I copied isIter function from:
-# https://stackoverflow.com/questions/1952464/in-python-how-do-i-determine-if-an-object-is-iterable
-def isIter(obj):
-    try:
-        return iter(obj)
-    except TypeError as te:
-        return False
-# ********************
+class CustomizeOperator:
 
+    """
+    It's customizes operator to implement
+    __instancecheck__
 
-def hasInstanceCheck(__instance):
-    try:
-        isinstance(object, __instance)
-        return True
-    except Exception as e:
-        return False
+    __init__ arguments:
+    fn: callable 
+    *args: fn args
+    **kwargs: fn kwargs
+
+    fn must be able to receive and handle a keyword
+    argument named __instance and must return boolean
+    """
+
+    def __init__(self, fn, *args, **kwargs) -> None:
+        """
+        __init__ arguments:
+        fn: callable 
+        *args: fn args
+        **kwargs: fn kwargs
+        """
+
+        assert callable(fn), 'fn must be callable'
+        self.fn = fn
+        self.args = args
+        self.kwargs = kwargs
+
+    def __repr__(self) -> str:
+        return f'fn doc: {self.fn.__doc__}' + \
+            f' args: {self.args} kwargs: {self.kwargs}'
+
+    def __instancecheck__(self, __instance: Any) -> bool:
+        """
+        fn must be able to receive and handle a keyword
+        argument named __instance and must return boolean
+        """
+
+        self.kwargs['__instance'] = __instance
+        return self.fn(*self.args, **self.kwargs)
 
 
 class ClassOperator:
@@ -50,7 +74,7 @@ class ClassOperator:
         cls: must be a class
         """
 
-        assert '__init__' in dir(cls), 'cls must be a class'
+        assert getattr(cls, '__init__'), 'cls must be a class'
         self.cls = cls
 
     def __repr__(self) -> str:
@@ -124,7 +148,7 @@ class InstanceOperator(Operator):
             instances) > 0, 'this class operat on instances, you must use instances too'
 
         for i in instances:
-            assert hasInstanceCheck(i)
+            assert hic(i)
 
         self.instances = instances
 
@@ -209,7 +233,10 @@ class ObjectOperator(InstanceOperator):
 class RepeatBoundary:
 
     """
-    It just use to keep minimum and maximum of a repetition
+    A class to check minimum and maximum of a repetition
+
+    After initialization you should use _instance.checkRepeat(count)
+    and it returns boolean
     """
 
     def __init__(self, min_, max_=None) -> None:
@@ -222,6 +249,17 @@ class RepeatBoundary:
         assert (isinstance(max_, int) and min_ <= max_) or max_ is None
         self.min = min_
         self.max = max_
+
+    def checkRepeat(self, count):
+        """
+        A method to check minimum and maximum of a repetition
+        """
+
+        if self.max is not None:
+            if count > self.max:
+                return False
+
+        return self.min <= count
 
     def __repr__(self) -> str:
         return f'(min: {self.min}, max: {self.max})'
@@ -277,18 +315,6 @@ class MapInstances:
         """
         self.instance = instance_
         self.setMapTuple(*mapTuple)
-
-    def __repr__(self) -> str:
-
-        def getMT():
-            for mt in self.mapTuple:
-                if isinstance(mt, dict):
-                    yield tuple(('k:', k, 'v:', v)
-                                for k, v in mt.items())
-                else:
-                    yield mt
-
-        return f'(instance: {self.instance}, mapTuple: {tuple(mt for mt in getMT())})'
 
     def setMapTuple(self, *mapTuple):
         if len(mapTuple) == 0:
@@ -352,13 +378,13 @@ class MapInstances:
                     except Exception as e:
                         return iIndex_
 
-                def tuFirstMatch(i_, x, x2, p_, max_):
-                    while x2 - x <= max_:
+                def tuFirstMatch(i_, x, lastX, p_):
+                    while x <= lastX + 1:
                         try:
-                            tupleAssert(i_[x2:], p_)
+                            tupleAssert(i_[x:], p_)
                             return True
                         except Exception as e:
-                            x2 += 1
+                            x += 1
                     return False
 
                 iIndex = -1
@@ -375,19 +401,18 @@ class MapInstances:
                     if isinstance(p[pIndex], RepeatBoundary):
                         rb = p[pIndex]
                         pIndex += 1
-                        iIndex2 = tuLastIndex(i, iIndex, p[pIndex])
+                        lastIndex = tuLastIndex(i, iIndex, p[pIndex])
 
-                        assert iIndex2 - iIndex >= rb.min, 'instance and pattern repetition are not match2'
+                        assert rb.checkRepeat(
+                            lastIndex - iIndex), 'instance and pattern repetition are not match2'
 
                         iIndex2 = iIndex + rb.min
-                        max = len(
-                            i) - iIndex if rb.max is None else rb.max + iIndex
 
                         assert tuFirstMatch(i,
-                                            iIndex,
                                             iIndex2,
-                                            p[pIndex+1:],
-                                            max), 'instance and pattern repetition are not match3'
+                                            lastIndex - 1,
+                                            p[pIndex+1:]), \
+                            'instance and pattern repetition are not match3'
 
                         return
 
@@ -406,13 +431,13 @@ class MapInstances:
                     except Exception as e:
                         return iIndex_
 
-                def diFirstMatch(i_, x, x2, p_, max_):
-                    while x2 - x <= max_:
+                def diFirstMatch(i_, x, lastX, p_):
+                    while x <= lastX + 1:
                         try:
-                            dictAssert({j['k']: j['v'] for j in i_[x2:]}, p_)
+                            dictAssert({j['k']: j['v'] for j in i_[x:]}, p_)
                             return True
                         except Exception as e:
-                            x2 += 1
+                            x += 1
                     return False
 
                 i = [{'k': k, 'v': i[k]} for k in i]
@@ -430,19 +455,18 @@ class MapInstances:
                     if isinstance(p[pIndex], RepeatBoundary):
                         rb = p[pIndex]
                         pIndex += 1
-                        iIndex2 = diLastIndex(i, iIndex, p[pIndex])
+                        lastIndex = diLastIndex(i, iIndex, p[pIndex])
 
-                        assert iIndex2 - iIndex >= rb.min, 'instance and pattern repetition are not match6'
+                        assert rb.checkRepeat(
+                            lastIndex - iIndex), 'instance and pattern repetition are not match6'
 
                         iIndex2 = iIndex + rb.min
-                        max = len(
-                            i) - iIndex if rb.max is None else rb.max + iIndex
 
                         assert diFirstMatch(i,
-                                            iIndex,
                                             iIndex2,
-                                            p[pIndex+1:],
-                                            max), 'instance and pattern repetition are not match7'
+                                            lastIndex - 1,
+                                            p[pIndex+1:]), \
+                            'instance and pattern repetition are not match7'
 
                         return
 
@@ -492,3 +516,15 @@ class MapInstances:
                 return False
 
         return isinstance(__instance, self.instance)
+
+    def __repr__(self) -> str:
+
+        def getMT():
+            for mt in self.mapTuple:
+                if isinstance(mt, dict):
+                    yield tuple(('k:', k, 'v:', v)
+                                for k, v in mt.items())
+                else:
+                    yield mt
+
+        return f'(instance: {self.instance}, mapTuple: {tuple(mt for mt in getMT())})'

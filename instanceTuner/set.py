@@ -1,7 +1,7 @@
+from CAImport.tools import Singleton, hasInstancecheck as hic
 from inspect import _ParameterKind, Parameter, signature, _empty
 import sys
 from typing import Any
-from instanceTuner.operator import hasInstanceCheck
 
 
 def getNameOrSelf(obj):
@@ -89,7 +89,7 @@ class ArgsCheck:
         __init__ argument:
         fn: a function
         """
-        assert callable(fn), 'fn must be a function'
+        assert callable(fn), 'fn must be a callable'
         self.fn = fn
 
         self.POSITIONAL_ONLY = []
@@ -262,7 +262,7 @@ class ArgsCheck:
 
             annotation = getNameOrSelf(self.fn.__annotations__["return"])
 
-            if hasInstanceCheck(self.fn.__annotations__['return']):
+            if hic(self.fn.__annotations__['return']):
 
                 assert self.fn.__annotations__['return'] == Any or \
                     isinstance(ret, self.fn.__annotations__['return']),\
@@ -341,7 +341,7 @@ class Function(ArgsCheck):
             # fetching the function to be invoked
             # from the virtual namespace
             # through the arguments.
-            fns = Namespace.get_instance().get(self.fn)
+            fns = Namespace().get(self.fn)
             assert fns is not None, "base of entered name and module, no matching function found."
             fn = ArgsCheck.find(fns, *args, **kwargs)
 
@@ -351,7 +351,7 @@ class Function(ArgsCheck):
         return get
 
 
-class Namespace(object):
+class Namespace(Singleton):
     """Namespace is the singleton class that is responsible
     for holding all the functions by their module name,
     class and their actual name and find it base on those.
@@ -362,20 +362,9 @@ class Namespace(object):
 
     it would wrap fn for overload purposes or checking annotations
     """
-    __instance = None
 
     def __init__(self):
-        if self.__instance is None:
-            self.function_map = dict()
-            Namespace.__instance = self
-        else:
-            raise Exception("cannot instantiate Namespace again.")
-
-    @staticmethod
-    def get_instance():
-        if Namespace.__instance is None:
-            Namespace()
-        return Namespace.__instance
+        self.function_map = dict()
 
     @staticmethod
     def key(fn):
@@ -412,4 +401,4 @@ def setFunction(fn):
     and returns a callable object for overload purposes or 
     checking annotations
     """
-    return Namespace.get_instance().register(fn)
+    return Namespace().register(fn)
